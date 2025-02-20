@@ -88,16 +88,61 @@ Modify settings as needed:
 
 ```json
 {
-  "fee": 0.01,
-  "useProxy": false
+  "useProxy": false,
+  "antiCaptchaKey": "your-antiCaptcha-API-KEY",
+  "twoCaptchaKey": "your-twoCaptcha-API-KEY",
+  "defaultSolver": "anticaptcha or twocaptcha",
+  "pollingInterval": 10,
+  "retryDelay": 10000,
+  "maxRetries": 3,
+  "matchMode": "auto or manual",
+  "fee": 0.1,
+  "maxGames": 10
 }
 ```
 
-💰 **Supported Entry Fees:** `0.01`, `0.001`, `0.0001` ETH.
+### 🔧 Configuration Details
 
-🌐 **Proxy Configuration:**
-- If you want to use a proxy, set `"useProxy": true` in `config.json`.
-- If you do not want to use a proxy, keep `"useProxy": false`.
+| Setting           | Description |
+|------------------|-------------|
+| `useProxy`       | Set to `true` to enable proxy support. Default is `false`. |
+| `antiCaptchaKey` | API key for Anti-Captcha service (leave blank if not used). |
+| `twoCaptchaKey`  | API key for 2Captcha service (leave blank if not used). |
+| `defaultSolver`  | Choose between `anticaptcha` or `twocaptcha` for solving captchas. |
+| `pollingInterval`| Interval (in seconds) for checking match status. Default is `10`. |
+| `retryDelay`     | Delay (in milliseconds) before retrying a failed request. Default is `10000` (10s). |
+| `maxRetries`     | Maximum number of retries before giving up on an operation. Default is `3`. |
+| `matchMode`      | Set to `auto` for automated matchmaking or `manual` for user input. |
+| `fee`            | Entry fee per match (e.g., `0.1` ETH). |
+| `maxGames`       | Maximum number of games the bot will play in a session. |
+
+#### Example Configurations:
+
+- **Standard Setup (No Proxy, Auto Matchmaking, Anti-Captcha):**
+
+```json
+{
+  "useProxy": false,
+  "antiCaptchaKey": "your-API-KEY",
+  "defaultSolver": "anticaptcha",
+  "matchMode": "auto",
+  "fee": 0.1,
+  "maxGames": 5
+}
+```
+
+- **Manual Mode with Proxy Enabled:**
+
+```json
+{
+  "useProxy": true,
+  "twoCaptchaKey": "your-API-KEY",
+  "defaultSolver": "twocaptcha",
+  "matchMode": "manual",
+  "fee": 0.01,
+  "maxGames": 3
+}
+```
 
 #### 📌 Step 5: Create a Screen Session (For Continuous Running)
 
@@ -142,38 +187,42 @@ npm install
 
 #### 📌 Step 3: Configure Wallets (Edit `data.txt`)
 
-1. Open `data.txt` using Notepad or any text editor.
-2. Enter your **private keys** (one per line):
-
-```txt
-your_private_key
-```
-
-⚠️ **Only use test wallets! Never use your main wallet.**
+Follow the same guidelines as in the Linux/macOS section.
 
 #### 📌 Step 4: Adjust Configuration (`config.json`)
 
-1. Open `config.json` using Notepad or any text editor.
-2. Modify settings as needed:
-
-```json
-{
-  "fee": 0.01,
-  "useProxy": false
-}
-```
-
-💰 **Supported Entry Fees:** `0.01`, `0.001`, `0.0001` ETH.
-
-🌐 **Proxy Configuration:**
-- If you want to use a proxy, set `"useProxy": true` in `config.json`.
-- If you do not want to use a proxy, keep `"useProxy": false`.
+Follow the same guidelines as in the Linux/macOS section.
 
 #### 📌 Step 5: Start the Bot
 
 ```powershell
 npm start
 ```
+---
+
+## 🔎 Checking Fractals for All Wallets
+
+You can use the `fetch-fractal.js` script to check Fractal balance for all wallets stored in `data.txt`.
+
+### 📌 Steps to Run `fetch-fractal.js`
+
+#### 🐧 Linux/macOS Users
+
+```bash
+node fetch-fractal.js
+```
+
+#### 🖥️ Windows Users
+
+```powershell
+node fetch-fractal.js
+```
+
+This script will:
+- Load private keys from `data.txt`
+- Optionally use proxies if enabled in `proxies.txt`
+- Authenticate wallets
+- Fetch Fractal balance for each wallet
 
 ---
 
@@ -202,4 +251,3 @@ npm start
 ---
 
 💡 **Need Help?** Join our Telegram group for real-time support and discussions! 🚀
-

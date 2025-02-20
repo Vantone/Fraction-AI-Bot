@@ -3,6 +3,20 @@ import WalletManager from "./src/core/wallet.js";
 import Tools from "./src/utils/tools.js";
 import Display from "./src/utils/display.js";
 
+async function loadConfig() {
+  try {
+    const data = await fs.readFile("config.json", "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("❌ Failed to load config.json:", error.message);
+    process.exit(1);
+  }
+}
+
+const config = await loadConfig();
+
+const isAutoMatch = config.matchMode === "auto";
+
 async function loadKeys() {
   try {
     const data = await fs.readFile("./data.txt", "utf8");
@@ -99,7 +113,13 @@ async function runWallet(key, lastAgentIndex = 0) {
         if (agent.sessionType.sessionType === session.sessionType.sessionType) {
           if (!agent.automationEnabled) {
             try {
-              const startResult = await wallet.startMatch(agent, session);
+              let startResult;
+              if (isAutoMatch) {
+                  startResult = await wallet.startAutoMatch(agent, session, config.maxGames, config.fee);
+              } else {
+                  startResult = await wallet.startMatch(agent, session);
+              }
+
               if (startResult) {
                 sessionCount++;
                 lastSessionTime = lastSessionTime || Date.now();
@@ -129,12 +149,14 @@ async function runWallet(key, lastAgentIndex = 0) {
               }
               continue;
             }
+          } else {
+            Tools.log("Already automated, skip to next agent...")
           }
         }
       }
     }
 
-    let minDuration = 180;
+    let minDuration = 10;
     for (const session of wallet.sessions) {
       const duration =
         session.sessionType.durationPerRound * session.sessionType.rounds;
