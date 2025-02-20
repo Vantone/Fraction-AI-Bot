@@ -156,7 +156,7 @@ async function runWallet(key, lastAgentIndex = 0) {
       }
     }
 
-    let minDuration = 10;
+    let minDuration = 60;
     for (const session of wallet.sessions) {
       const duration =
         session.sessionType.durationPerRound * session.sessionType.rounds;
