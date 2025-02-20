@@ -3,7 +3,7 @@ import Network from "./network.js";
 import Tools from "../utils/tools.js";
 import Client from "../services/client.js";
 import Display from "../utils/display.js";
-import Solver from "../services/solver.js";
+import Solver from "../services/solvers/index.js";
 import fs from "fs/promises";
 
 const loadConfig = async () => {
@@ -24,9 +24,6 @@ class WalletManager extends Client {
     this.wallet = null;
     this.address = null;
     this.activeMatches = {};
-    this.sessionCount = 0;
-    this.lastSessionTime = null;
-    this.currentAgentIndex = 0;
     this.solver = null;
   }
 
@@ -41,7 +38,7 @@ class WalletManager extends Client {
 
   async initialize() {
     this.config = await loadConfig();
-    this.solver = new Solver(this.config.antiCaptchaKey);
+    this.solver = new Solver(this.config);
     await this.checkProxyIP();
   }
 
@@ -298,6 +295,68 @@ class WalletManager extends Client {
       throw error;
     }
   }
+
+  async startAutoMatch(agent, session, maxGames, feeTier) {
+    try {
+        if (!this.config) {
+            await this.initialize();
+        }
+
+        const isInQueue = await this.checkAgentStatus(agent);
+        if (isInQueue) {
+            Tools.log(`Agent ${agent.name} is already in queue`);
+            return false;
+        }
+
+        await Tools.delay(2000, `Starting automation: Agent ${agent.name} - Session ${session.sessionType.name}`);
+
+        // 🔹 Fetch nonce and captcha
+        const nonceResponse = await this.fetch("/auth/nonce", "GET", this.token);
+        if (nonceResponse.status !== 200 || !nonceResponse.data.nonce || !nonceResponse.data.image) {
+            throw new Error("Failed to get nonce and captcha");
+        }
+
+        Tools.log("Solving captcha...");
+        const captchaSolution = await this.solver.solve(nonceResponse.data.image);
+        
+        // 🔹 Construct payload for automated matchmaking
+        const payload = {
+            agentId: agent.id,
+            sessionTypeId: session.sessionType.id,
+            maxGames: maxGames,
+            maxParallelGames: 10, 
+            stopLoss: 0.5,  
+            takeProfit: 0.1, 
+            feeTier: feeTier,    
+            nonce: nonceResponse.data.nonce,
+            captchaText: captchaSolution
+        };
+
+        // 🔹 Call API for automated matchmaking
+        const response = await this.fetch("/automated-matchmaking/enable", "POST", this.token, payload);
+        Tools.log(response.data.message)
+        if (response.status === 201 && response.data.message === "Automated matchmaking enabled successfully") {
+            Tools.updateDisplay(this);
+            await Tools.delay(500, `Automation enabled: ${agent.name} - ${session.sessionType.name}`);
+            this.solver.reportGood();
+            return true;
+        } else if (response.data?.error?.includes("invalid captcha")) {
+            Tools.log("Invalid captcha solution, retrying...");
+            this.solver.reportBad();
+            return await this.startMatch(agent, session);
+        } else {
+            throw new Error(response.data?.error || "Failed to enable automated matchmaking");
+        }
+    } catch (error) {
+        if (error.message.includes("captcha")) {
+            Tools.log("Captcha error, retrying...");
+            await Tools.delay(2000, "Waiting before retry");
+            return await this.startMatch(agent, session);
+        }
+        throw error;
+    }
+  }
+
 
   async executeTx(txData) {
     try {
