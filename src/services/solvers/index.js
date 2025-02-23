@@ -15,6 +15,10 @@ class Solver {
       if (config.antiCaptchaKey) {
         this.solvers.anticaptcha = new AntiCaptchaSolver(config.antiCaptchaKey);
       }
+      
+      if (config.geminiApiKey) {
+        this.solvers.gemini = new GeminiSolver(config.geminiApiKey);
+      }
 
       if (config.twoCaptchaKey) {
         this.solvers.twocaptcha = new TwoCaptchaSolver(config.twoCaptchaKey, {
