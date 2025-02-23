@@ -1,5 +1,6 @@
 import AntiCaptchaSolver from "./anticaptcha.js";
 import TwoCaptchaSolver from "./twocaptcha.js";
+import GeminiSolver from "./gemini.js";
 import fetch from "node-fetch";
 import Tools from "../../utils/tools.js";
 
