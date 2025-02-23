@@ -109,6 +109,7 @@ Modify settings as needed:
 | `useProxy`       | Set to `true` to enable proxy support. Default is `false`. |
 | `antiCaptchaKey` | API key for Anti-Captcha service (leave blank if not used). |
 | `twoCaptchaKey`  | API key for 2Captcha service (leave blank if not used). |
+| `geminiApiKey` |API key for gemini service "https://aistudio.google.com/app/apikey"  |
 | `defaultSolver`  | Choose between `anticaptcha` or `twocaptcha` for solving captchas. |
 | `pollingInterval`| Interval (in seconds) for checking match status. Default is `10`. |
 | `retryDelay`     | Delay (in milliseconds) before retrying a failed request. Default is `10000` (10s). |
